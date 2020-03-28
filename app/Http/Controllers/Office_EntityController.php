@@ -8,6 +8,7 @@ use App\OfficeDepartment;
 use App\Office;
 use App\OfficeDesk;
 use App\OfficePost;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -23,15 +24,43 @@ class Office_EntityController extends Controller
      */
      public function index()
      {
-       if(!session('Current_User_type') == 'Admin')
+       if(session('Current_User_type') == 'valueAdmin')
        {
-         return view('welcome');
+         $Temp_Current_User_id=session('Current_User_id');
+         $Temp_Current_office_id=session('Current_office_id');
+         $Temp_Current_department_id=session('Current_department_id');
+
+
+         $varOffice_Entity= DB::table('office_entities')
+                          ->where([['office_entities.Office_Entity_office_id','=',$Temp_Current_office_id],
+                                    ['office_entities.Office_Entity_department_id','=',$Temp_Current_department_id]
+                        ])
+                        ->join('office_posts','office_posts.Office_Posts_id','=','office_entities.Office_Entity_office_post_id')
+                        ->join('office_desks','office_desks.Office_Desk_id','=','office_entities.Office_Entity_desk_id')
+                        ->get()->toArray();
+         return view('Admin_Update_Office_Entity',compact('varOffice_Entity'));
+
        }
-       $varOffice_Entity = OfficeEntity::get()->toArray();
-       $varOffice_Department = OfficeDepartment::get()->toArray();
-       $varOffice_Desk = OfficeDesk::get()->toArray();
-       $varOffice= Office::get()->toArray();
-       return view('Office_Entity_Update_Office_Entity',compact('varOffice_Entity','varOffice_Department','varOffice_Desk','varOffice'));
+
+       if(session('Current_User_type') == 'SUPERADMIN')
+       {
+
+
+
+         $varOffice_Entity= DB::table('office_entities')
+                        ->join('offices','offices.Office_id','=','office_entities.Office_Entity_office_id')
+                        ->join('office_departments','office_departments.Office_Department_id','=','office_entities.Office_Entity_department_id')
+                        ->join('office_posts','office_posts.Office_Posts_id','=','office_entities.Office_Entity_office_post_id')
+                        ->join('office_desks','office_desks.Office_Desk_id','=','office_entities.Office_Entity_desk_id')
+                        ->get()->toArray();
+          print_r($varOffice_Entity);
+          exit();
+         return view('Sadmin_Update_Office_Entity',compact('varOffice_Entity'));
+
+       }
+
+       return view('welcome');
+
      }
 
      /**
@@ -41,15 +70,29 @@ class Office_EntityController extends Controller
       */
      public function create()
      {
-       if(!session('Current_User_type') == 'Admin')
+       if(session('Current_User_type') == 'valueAdmin')
        {
-         return view('welcome');
-       }
-       $varOffice_Department = OfficeDepartment::get()->toArray();
-       $varOffice_Desk = OfficeDesk::get()->toArray();
-       $varOffice = Office::get()->toArray();
-       $varOffice_Posts = OfficePost::get()->toArray();
-      return view('Office_Entity_Insert_Office_Entity',compact('varOffice_Department','varOffice_Desk','varOffice','varOffice_Posts'));
+
+         $Temp_Current_User_id=session('Current_User_id');
+         $Temp_Current_office_id=session('Current_office_id');
+         $Temp_Current_department_id=session('Current_department_id');
+
+        $varOffice_Desk= DB::table('office_desks')
+                        ->where([['office_desks.Office_Desk_office_id','=',$Temp_Current_office_id],
+                                ['office_desks.Office_Desk_department_id','=',$Temp_Current_department_id]])
+                                ->get()->toArray();
+
+             $varOffice_Posts = OfficePost::get()->toArray();
+
+             return view('Admin_Insert_Office_Entity',compact('varOffice_Desk','varOffice_Posts'));
+      }
+
+      if(session('Current_User_type') == 'SUPERADMIN')
+      {
+
+     }
+
+      return view('welcome');
      }
 
      /**
@@ -60,36 +103,50 @@ class Office_EntityController extends Controller
       */
      public function store(Request $request)
      {
-       if(!session('Current_User_type') == 'Admin')
+       if(session('Current_User_type') == 'valueAdmin')
        {
+         $Temp_Current_User_id=session('Current_User_id');
+         $Temp_Current_office_id=session('Current_office_id');
+         $Temp_Current_department_id=session('Current_department_id');
+
+         $varOffice_Entity= new OfficeEntity([
+                           'Office_Entity_type'=> "Employee",
+                           'Office_Entity_mobile_number'=> $request->get('Office_Entity_mobile_number'),
+                           'Office_Entity_password'=> $request->get('Office_Entity_password'),
+                           'Office_Entity_email_id'=> $request->get('Office_Entity_email_id'),
+                           'Office_Entity_name'=> $request->get('Office_Entity_name'),
+                           'Office_Entity_office_id'=> $Temp_Current_office_id,
+                           'Office_Entity_department_id'=> $Temp_Current_department_id,
+                           'Office_Entity_office_post_id'=> $request->get('Office_Entity_office_post_id'),
+                           'Office_Entity_desk_id'=> $request->get('Office_Entity_desk_id'),
+                           'Office_Entity_gender'=> $request->get('Office_Entity_gender'),
+                           'Office_Entity_address'=> $request->get('Office_Entity_address'),
+                           'Office_Entity_city'=> $request->get('Office_Entity_city'),
+                           'Office_Entity_pincode'=> $request->get('Office_Entity_pincode'),
+         ]);
+               $varOffice_Entity->save();
+               echo "<script>alert('Data is inserted ...')</script>";
+               $varOffice_Desk= DB::table('office_desks')
+                               ->where([['office_desks.Office_Desk_office_id','=',$Temp_Current_office_id],
+                                       ['office_desks.Office_Desk_department_id','=',$Temp_Current_department_id]])
+                                       ->get()->toArray();
+
+                    $varOffice_Posts = OfficePost::get()->toArray();
+
+                    return view('Admin_Insert_Office_Entity',compact('varOffice_Desk','varOffice_Posts'));
+
+        if(session('Current_User_type') == 'SUPERADMIN')
+        {
+
+        }
+
+
          return view('welcome');
-       }
-       $varOffice_Entity= new OfficeEntity([
 
-     'Office_Entity_type'=> $request->get('Office_Entity_type'),
-     'Office_Entity_mobile_number'=> $request->get('Office_Entity_mobile_number'),
-     'Office_Entity_password'=> $request->get('Office_Entity_password'),
-     'Office_Entity_email_id'=> $request->get('Office_Entity_email_id'),
-     'Office_Entity_name'=> $request->get('Office_Entity_name'),
-     'Office_Entity_office_id'=> $request->get('Office_Entity_office_id'),
-     'Office_Entity_department_id'=> $request->get('Office_Entity_department_id'),
-     'Office_Entity_office_post_id'=> $request->get('Office_Entity_office_post_id'),
 
-     'Office_Entity_desk_id'=> $request->get('Office_Entity_desk_id'),
-
-     'Office_Entity_gender'=> $request->get('Office_Entity_gender'),
-     'Office_Entity_address'=> $request->get('Office_Entity_address'),
-     'Office_Entity_city'=> $request->get('Office_Entity_city'),
-     'Office_Entity_pincode'=> $request->get('Office_Entity_pincode'),
-       ]);
-       $varOffice_Entity->save();
-       echo "<script>alert('Data is inserted ...')</script>";
-       $varOffice_Department = OfficeDepartment::get()->toArray();
-       $varOffice_Desk = OfficeDesk::get()->toArray();
-       $varOffice = Office::get()->toArray();
-       $varOffice_Posts = OfficePost::get()->toArray();
-      return view('Office_Entity_Insert_Office_Entity',compact('varOffice_Department','varOffice_Desk','varOffice','varOffice_Posts'));
      }
+
+   }
 
      /**
       * Display the specified resource.

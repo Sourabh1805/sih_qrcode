@@ -27,6 +27,7 @@ class TaskController extends Controller
       $varTask = DB::table('tasks')->where([
                         ['Task_office_id', '=', $Temp_Current_office_id],
                         ['Task_department_id', '=', $Temp_Current_department_id],
+
             ])->get()->toArray();
 
 
@@ -40,12 +41,21 @@ class TaskController extends Controller
      */
     public function create()
     {
-      if(!session('Current_User_type') == 'valueAdmin')
+      if(session('Current_User_type') == 'valueAdmin')
       {
-        return view('welcome');
-      }
-        $varOffice_Desk= OfficeDesk::get()->toArray();
+        $Temp_Current_User_id=session('Current_User_id');
+        $Temp_Current_office_id=session('Current_office_id');
+        $Temp_Current_department_id=session('Current_department_id');
+
+        $varOffice_Desk = DB::table('office_desks')->where([
+                          ['Office_Desk_office_id', '=', $Temp_Current_office_id],
+                          ['Office_Desk_department_id', '=', $Temp_Current_department_id],
+                          ['Office_Desk_title','!=',"GENRAL DESK"]
+              ])->get()->toArray();
         return view('Admin_Insert_Task',compact('varOffice_Desk'));
+      }
+        return view('welcome');
+
     }
 
     /**
@@ -57,24 +67,17 @@ class TaskController extends Controller
     public function store(Request $request)
     {
 
-      if(!session('Current_User_type') == 'valueAdmin')
+      if(session('Current_User_type') == 'valueAdmin')
       {
-        return view('welcome');
-      }
       $var=$request->get('Task_desk_list');
+
       $temp= json_encode($var);
 
-      //
-      //echo $temp;
-      //exit();
+      $arr=json_decode($temp);
 
-      $arr=json_decode($temp);    // list to array of elements
-      //print_r ($arr);
-      //exit();
       $sum=0;
       foreach($arr as $r)
       {
-
         $tempfun=DB::table('office_desks')
                         ->where('Office_Desk_id', $r)->get()->toArray();
 
@@ -84,13 +87,10 @@ class TaskController extends Controller
       }
 
 
-
-      //
       $Temp_Current_User_id=session('Current_User_id');
       $Temp_Current_office_id=session('Current_office_id');
       $Temp_Current_department_id=session('Current_department_id');
 
-      //exit();
       $varTask= new Task([
       'Task_title'=> $request->get('Task_title'),
       'Task_description'=> $request->get('Task_description'),
@@ -102,8 +102,17 @@ class TaskController extends Controller
       ]);
       $varTask->save();
       echo "<script>alert('Data is inserted ...')</script>";
-      $varOffice_Desk= OfficeDesk::get()->toArray();
-      return view('Admin_Insert_Task',compact('varOffice_Desk'));
+
+
+
+        $varOffice_Desk = DB::table('office_desks')->where([
+                          ['Office_Desk_office_id', '=', $Temp_Current_office_id],
+                          ['Office_Desk_department_id', '=', $Temp_Current_department_id],
+                          ['Office_Desk_title','!=',"GENRAL DESK"]
+              ])->get()->toArray();
+        return view('Admin_Insert_Task',compact('varOffice_Desk'));
+      }
+        return view('welcome');
 
     }
 

@@ -27,8 +27,8 @@
   <div class="form-group">
   <label> Status</label>
   <select class="form-control" type="text" name='File_Action_status' value="{{$varFile_Action2->File_Action_status}}" required>
-    <option value="Completed">Completed</option>
-    <option value="Pending">Pending</option>
+    <option value="COMPLETED">Completed</option>
+    <option value="PENDING">Pending</option>
   </select>
   </div>
 
@@ -37,17 +37,18 @@
   </div>
 
   <div class="form-group">
-
   <input type="hidden" class="form-control" type="text" name='File_Action_desk_id' value="{{$varFile_Action2->File_Action_desk_id}}" required>
   </div>
 
   <div class="form-group">
-
   <input type="hidden" class="form-control" type="text" name='File_Action_Start_date' value="{{$varFile_Action2->File_Action_Start_date}}" required>
   </div>
 
   <div class="form-group">
+  <input type="hidden" class="form-control" type="text" name='File_Action_file_id' value="{{$varFile_Action2->File_Action_file_id}}" required>
+  </div>
 
+  <div class="form-group">
   <input type="hidden" class="form-control" type="text" name='File_Action_next_desk_id' value="{{$varFile_Action2->File_Action_next_desk_id}}" required>
   </div>
 

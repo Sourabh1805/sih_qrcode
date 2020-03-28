@@ -68,10 +68,10 @@
                         <a href="#"><i class="fa fa-desktop "></i>Departments <span class="fa arrow"></span></a>
                          <ul class="nav nav-second-level">
                             <li>
-                                <a href="\office\create"><i class="fa fa-toggle-on"></i>Add department</a>
+                                <a href="\office_department\create"><i class="fa fa-toggle-on"></i>Add department</a>
                             </li>
                             <li>
-                                <a href="\office"><i class="fa fa-bell "></i>Edit department</a>
+                                <a href="\office_department"><i class="fa fa-bell "></i>Edit department</a>
                             </li>
                         </ul>
                     </li>
@@ -80,25 +80,15 @@
                         <a href="#"><i class="fa fa-desktop "></i>Post <span class="fa arrow"></span></a>
                          <ul class="nav nav-second-level">
                             <li>
-                                <a href="\office\create"><i class="fa fa-toggle-on"></i>Add POST</a>
+                                <a href="\officepost\create"><i class="fa fa-toggle-on"></i>Add POST</a>
                             </li>
                             <li>
-                                <a href="\office"><i class="fa fa-bell "></i>Edit POST</a>
+                                <a href="\officepost"><i class="fa fa-bell "></i>Edit POST</a>
                             </li>
                         </ul>
                     </li>
 
-                    <li>
-                        <a href="#"><i class="fa fa-desktop "></i>Initiators <span class="fa arrow"></span></a>
-                         <ul class="nav nav-second-level">
-                            <li>
-                                <a href="\initiator\create"><i class="fa fa-toggle-on"></i>Add Initiators</a>
-                            </li>
-                            <li>
-                                <a href="\initiator"><i class="fa fa-bell "></i>Edit Initiators</a>
-                            </li>
-                        </ul>
-                    </li>
+                  
 
 
                     <li>
@@ -246,7 +236,7 @@
     <!-- /. WRAPPER  -->
 
     <div id="footer-sec">
-        &copy; 2014 YourCompany | Design By : <a href="http://www.binarytheme.com/" target="_blank">BinaryTheme.com</a>
+        team CodeBluff
     </div>
     <!-- /. FOOTER  -->
     <!-- SCRIPTS -AT THE BOTOM TO REDUCE THE LOAD TIME-->

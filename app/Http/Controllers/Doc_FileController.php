@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\DocFile;
 use App\Initiator;
@@ -13,6 +11,7 @@ use App\FileAction;
 use App\Mail\sendemail;
 use Illuminate\Support\Facades\Mail;
 use App\Office;
+use App\OfficeDesk;
 
 
 
@@ -50,9 +49,9 @@ class Doc_FileController extends Controller
 
               return view('Admin_Update_Doc_File',compact('users'));
       }
-      else {
+
         return view('welcome');
-      }
+
 
     }
 
@@ -84,10 +83,8 @@ class Doc_FileController extends Controller
         $varInitiator = Initiator::get()->toArray();
         return view('Admin_Insert_Doc_File',compact('varInitiator','vartask'));
       }
-      else {
-        return view('welcome');
-      }
 
+        return view('welcome');
     }
 
     /**
@@ -101,11 +98,9 @@ class Doc_FileController extends Controller
     public function store(Request $request)
     {
 
-      if(!session('Current_User_type') == 'valueAdmin')
+      if(session('Current_User_type') == 'valueAdmin')
       {
-        return view('welcome');
 
-      }
       $Temp_Current_User_id=session('Current_User_id');
       $Temp_Current_office_id=session('Current_office_id');
       $Temp_Current_department_id=session('Current_department_id');
@@ -117,16 +112,18 @@ class Doc_FileController extends Controller
       $varOffice_Department_Initial = $varOffice_Department['Office_Department_initial'];
 
       $varDoc_Filetemp = DB::table('doc_files')
-                  ->orderBy('Doc_File_id', 'desc')
-                  ->get()->toArray();
+                 ->orderBy('Doc_File_id', 'desc')
+                 ->get()->toArray();
 
-      $tempid=$varDoc_Filetemp[0]->Doc_File_id;
+
 
       if(sizeof($varDoc_Filetemp)==0)
       {
         $fid=1;
       }
       else {
+        $tempid=$varDoc_Filetemp[0]->Doc_File_id;
+
         $fid=$tempid+1;
 
       }
@@ -134,6 +131,26 @@ class Doc_FileController extends Controller
 
       //echo session('Current_department_id');
       //exit();
+
+      $CurrentTask = Task::find($request->get('Doc_File_task_id'));
+      $CurrentTaskTimeRequired=$CurrentTask['Task_time_requried'];
+
+      date_default_timezone_set('Asia/Kolkata');
+      $now=strtotime("now");
+      $TempCurrentDate= date("Y-m-d", $now);
+      $d=strtotime("+1 day",$now);
+      $TempNextDate= date("Y-m-d",$d);
+
+
+      $Doc_File_end_date="+".$CurrentTaskTimeRequired."day";
+      $Doc_File_end_date=strtotime($Doc_File_end_date,$now);
+      $Doc_File_end_date= date("Y-m-d",$Doc_File_end_date);
+
+
+      //echo $Doc_File_end_date;
+      //echo $CurrentTaskTimeRequired;
+      //exit();
+
 
      $varDoc_File= new DocFile([
        'Doc_File_QR_id'=>$varkey,
@@ -143,16 +160,16 @@ class Doc_FileController extends Controller
        'Doc_File_department_id'=>$Temp_Current_department_id,
        'Doc_File_subject'=> $request->get('Doc_File_subject'),
        'Doc_File_remark'=> $request->get('Doc_File_remark'),
-
+       'Doc_File_end_date'=>$Doc_File_end_date,
+       'Doc_File_start_date'=>$TempCurrentDate,
        'Doc_File_task_id'=> $request->get('Doc_File_task_id'),
-
        'Doc_File_priority'=> $request->get('Doc_File_priority'),
        'Doc_File_status'=> "On going",
 
 
     ]);
 
-    $CurrentTask = Task::find($request->get('Doc_File_task_id'));
+
     //print_r($CurrentTask);
     //exit();
     $CurrentDeskList=json_decode($CurrentTask->Task_desk_list);    // list to array of elements
@@ -167,11 +184,6 @@ class Doc_FileController extends Controller
                     ->where('Office_Entity_id','=',$Temp_Current_User_id)->get()->toArray();
 
 
-      date_default_timezone_set('Asia/Kolkata');
-      $d=strtotime("now");
-      $TempCurrentDate= date("Y-m-d h:i:sa", $d);
-      $d=strtotime("+1 day",$d);
-      $TempNextDate= date("Y-m-d h:i:sa",$d);
 
   //  print_r($TempNextDate);
   //  exit();
@@ -184,7 +196,7 @@ class Doc_FileController extends Controller
     'File_Action_no_of_warning'=> 0,
     'File_Action_Start_date' =>$TempCurrentDate,
     'File_Action_end_date' =>$TempCurrentDate,
-    'File_Action_status'=> "Complete",
+    'File_Action_status'=> "COMPLETED",
         ]);
 
         $varFile_Action->save();
@@ -193,6 +205,7 @@ class Doc_FileController extends Controller
 
         $mobile = array();
         $tempEmpCount=1;
+
 
 
 
@@ -213,10 +226,17 @@ class Doc_FileController extends Controller
           //exit();
           if($tempEmpCount==count($CurrentDeskList))
           {
+
+
+
+
+
             $varFile_Action= new FileAction([
             'File_Action_file_id'=> $varkey,
             'File_Action_desk_id'=>$tempfun[0]->Office_Entity_desk_id,
             'File_Action_emp_id'=> $tempfun[0]->Office_Entity_id,
+
+
             'File_Action_no_of_warning'=> 0,
             'File_Action_status'=>"Waiting for file",
                 ]);
@@ -225,6 +245,16 @@ class Doc_FileController extends Controller
           }
           elseif ($tempEmpCount==1 )
           {
+            $varDesk=OfficeDesk::find($tempfun[0]->Office_Entity_desk_id);
+
+
+
+            $CurrentTaskTimeRequired=$varDesk['Office_Desk_time_requried']+$CurrentTaskTimeRequired;
+
+            $File_Action_end_date="+".$CurrentTaskTimeRequired."day";
+            $File_Action_end_date=strtotime($File_Action_end_date,$now);
+            $File_Action_end_date= date("Y-m-d",$File_Action_end_date);
+
             $varFile_Action= new FileAction([
             'File_Action_file_id'=> $varkey,
             'File_Action_desk_id'=>$tempfun[0]->Office_Entity_desk_id,
@@ -232,6 +262,7 @@ class Doc_FileController extends Controller
             'File_Action_next_desk_id'=> $CurrentDeskList[$tempEmpCount],
             'File_Action_no_of_warning'=> 0,
             'File_Action_Start_date' =>$TempNextDate,
+            'File_Action_end_date'=>$File_Action_end_date,
             'File_Action_status'=>"On going",
                 ]);
 
@@ -239,11 +270,16 @@ class Doc_FileController extends Controller
           }
 
           else {
+
+
+
             $varFile_Action= new FileAction([
             'File_Action_file_id'=> $varkey,
             'File_Action_desk_id'=>$tempfun[0]->Office_Entity_desk_id,
             'File_Action_emp_id'=> $tempfun[0]->Office_Entity_id,
             'File_Action_next_desk_id'=> $CurrentDeskList[$tempEmpCount],
+
+
             'File_Action_no_of_warning'=> 0,
             'File_Action_status'=>"Waiting for file",
                 ]);
@@ -442,8 +478,10 @@ $this->send($mail,$data);
         "fid"=>$varkey
     ]);
     return redirect ('/qrcode');
+  }
+    return view('welcome');
 
-    }
+}
 
     /**
      * Display the specified resource.
@@ -464,12 +502,14 @@ $this->send($mail,$data);
      */
     public function edit($Doc_File_id)
     {
+      if(session('Current_User_type') == 'valueAdmin')
+      {
+            $varDoc_File = DocFile::find($Doc_File_id);
+            return view('Admin_View_Doc_File',compact('varDoc_File','Doc_File_id'));
+      }
+        return view('welcome');
 
-        $str = "".$Doc_File_id;
-        $ids = explode("-",$str);
 
-        $varDoc_File=DocFile::find($ids[2]);
-        return view('View_Doc_File',compact('varDoc_File','Doc_File_id'));
     }
 
     /**
@@ -481,28 +521,26 @@ $this->send($mail,$data);
      */
     public function update(Request $request, $id)
     {
+          if(session('Current_User_type') == 'valueAdmin')
+              {
+                  $varDoc_File=  DocFile::find($id);
 
-      if(!session('Current_User_type') == 'valueAdmin')
-      {
-        return view('welcome');
+                  $varDoc_File->Doc_File_title= $request->get('Doc_File_title');
 
-      }
+                  $varDoc_File->Doc_File_subject= $request->get('Doc_File_subject');
+                  $varDoc_File->Doc_File_remark= $request->get('Doc_File_remark');
+                  $varDoc_File->Doc_File_start_date= $request->get('Doc_File_start_date');
 
-      $varDoc_File=  DocFile::find($id);
-      $varDoc_File->Doc_File_initiator_id= $request->get('Doc_File_initiator_id');
-      $varDoc_File->Doc_File_title= $request->get('Doc_File_title');
-      $varDoc_File->Doc_File_office_id= $request->get('Doc_File_office_id');
-      $varDoc_File->Doc_File_department_id= $request->get('Doc_File_department_id');
-      $varDoc_File->Doc_File_subject= $request->get('Doc_File_subject');
-      $varDoc_File->Doc_File_remark= $request->get('Doc_File_remark');
-      $varDoc_File->Doc_File_start_date= $request->get('Doc_File_start_date');
-      $varDoc_File->Doc_File_task_id= $request->get('Doc_File_task_id');
-      $varDoc_File->Doc_File_end_date= $request->get('Doc_File_end_date');
-      $varDoc_File->Doc_File_priority= $request->get('Doc_File_priority');
-      $varDoc_File->Doc_File_status= $request->get('Doc_File_status');
+                  $varDoc_File->Doc_File_end_date= $request->get('Doc_File_end_date');
+                  $varDoc_File->Doc_File_priority= $request->get('Doc_File_priority');
+                  $varDoc_File->Doc_File_status= $request->get('Doc_File_status');
 
-      $varDoc_File->save();
-      return redirect ('/doc_file');
+                  $varDoc_File->save();
+                  return redirect ('/doc_file');
+              }
+          return view('welcome');
+
+
     }
 
     /**
@@ -513,22 +551,23 @@ $this->send($mail,$data);
      */
     public function destroy($Doc_File_id)
     {
-      if(!session('Current_User_type') == 'valueAdmin')
+      if(session('Current_User_type') == 'valueAdmin')
       {
-        return view('welcome');
 
-      }
       $varDoc_File = DocFile::find($Doc_File_id);
       $varDoc_File->delete();
       echo"<script>alert('Deleted')</script>";
       $varDoc_File=DocFile::get()->toArray();
       return view('Admin_Update_Doc_File',compact('varDoc_File'));
     }
+      return view('welcome');
+
+
+    }
 
     public function send($mail,$data)
     {
-     //print_r($data);
-    //  exit();
+
     $this->$mail=$mail;
       Mail::to("$mail")->send(new sendemail($data));
       return back()->with('success', 'Thanks for contacting us!');

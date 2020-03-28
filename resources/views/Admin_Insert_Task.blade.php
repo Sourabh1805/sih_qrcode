@@ -42,11 +42,15 @@
                    <label>Enter desk list :</label>
                    <select multiple="multiple" class="form-control" name="Task_desk_list[]">
                      @foreach($varOffice_Desk as $row)
-                        <option value="{{$row['Office_Desk_id']}}">{{$row['Office_Desk_title']}}</option>
+                        <option value="{{$row->
+
+                          Office_Desk_id}}">{{$row->Office_Desk_title}}</option>
                      @endforeach
                    </select>
                    <!--input class="form-control" type="text" name='Doc_File_task_id'-->
          </div>
+
+
 
                         <button type="submit" class="btn btn-info">Add </button>
 
@@ -83,7 +87,6 @@
 </div>
 <!-- /. PAGE WRAPPER  -->
 </div>
-
-
+   </body>
 
 @endsection

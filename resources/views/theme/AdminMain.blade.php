@@ -51,17 +51,18 @@
                         <li>
                             <a class="active-menu" href="dashboard"><i class="fa fa-dashboard"></i>Dashboard</a>
                         </li>
-                                            <li>
-                                                <a href="#"><i class="fa fa-bars"></i>File <span class="fa arrow"></span></a>
-                                                 <ul class="nav nav-second-level">
-                                                    <li>
-                                                        <a href="\doc_file\create"><i class="fa fa-plus"></i>Add File</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="\doc_file"><i class="fa fa-edit"></i>Edit File</a>
-                                                    </li>
-                                                </ul>
-                                            </li>
+
+              <li>
+                    <a href="#"><i class="fa fa-bars"></i>File <span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                  <li>
+                                      <a href="\doc_file\create"><i class="fa fa-plus"></i>Add File</a>
+                                  </li>
+                                  <li>
+                                        <a href="\doc_file"><i class="fa fa-edit"></i>Edit File</a>
+                                  </li>
+                              </ul>
+             </li>
 
 
 
@@ -79,12 +80,6 @@
 
 
 
-
-
-
-
-
-
                         <li>
                             <a href="#"><i class="fas fa-address-card"></i>Desk <span class="fa arrow"></span></a>
                              <ul class="nav nav-second-level">
@@ -96,9 +91,6 @@
                                 </li>
                             </ul>
                         </li>
-
-
-
 
 
                         <li>
@@ -114,15 +106,19 @@
                         </li>
 
 
+                        <li>
+                            <a href="\delay"><i class="fa fa-folder"></i>send delay notification <span class="fa arrow"></span></a>
+                        </li>
+
 
                         <li>
-                            <a href="#"><i class="fa fa-folder"></i>Store File <span class="fa arrow"></span></a>
-                             <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="\task\create"><i class="fa fa-refresh"></i>Update File location</a>
-                                </li>
+                            <a href="leave"><i class="fas fa-address-card"></i>leave <span class="fa arrow"></span></a>
+                        </li>
 
-                            </ul>
+
+                        <li>
+                            <a href="store_file"><i class="fa fa-folder"></i>Store File <span class="fa arrow"></span></a>
+
                         </li>
 
 
@@ -156,15 +152,9 @@
                         </li>
 
 
-
-
-
-
                 </ul>
 
-
-
-                </div>
+        </div>
 
             </nav>
             <!-- /. END NAVBAR  -->

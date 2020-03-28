@@ -61,24 +61,24 @@ Route::resource('office_desk','Office_DeskController');
 Route::resource('task','TaskController');
 Route::resource('auth','AuthenticationController');
 Route::resource('office_entity','Office_EntityController');
-Route::resource('leave','LeaveController');
+
 Route::resource('office_department','Office_DepartmentController');
 Route::resource('temp','TempController');
 Route::resource('bunch','File_BunchController');
 Route::resource('rack','Office_RackController');
 Route::resource('searchfile','SearchFileController');
+Route::resource('delay','SendDelayNotificationController');
+Route::resource('leave','AddLeaveController');
+Route::resource('pendingfile','PendingFilesController');
 
 Route::resource('qrcode','QrcodeController');
-
-
-Route::get('qrcodetemp', function () {
-     return QrCode::size(300)->generate('$id');
- });
-
+Route::resource('store_file','StoreFileController');
 
 Route::post('check','AuthenticationController@LoginAdmin');
 Route::get('getfiles','WebServiceController@getFiles');
 Route::post('updatestatus','WebServiceController@updateStatus');
+
+
 
 
 

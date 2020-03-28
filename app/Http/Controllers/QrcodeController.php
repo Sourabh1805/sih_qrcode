@@ -1,8 +1,16 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
+use App\DocFile;
+use App\Initiator;
+use App\Task;
+use App\OfficeDepartment;
+use Illuminate\Support\Facades\DB;
+use App\OfficeEntity;
+use App\FileAction;
+use App\Office;
+
+
 
 class QrcodeController extends Controller
 {
@@ -13,14 +21,39 @@ class QrcodeController extends Controller
      */
     public function index()
     {
-      if(!session('Current_User_type') == 'valueAdmin')
+      if(session('Current_User_type') == 'valueAdmin')
       {
-        return view('welcome');
+            $Temp_Current_User_id=session('Current_User_id');
+            $Temp_Current_office_id=session('Current_office_id');
+            $Temp_Current_department_id=session('Current_department_id');
+            $id = session("fid");
+
+
+            $varFile_Action = DB::table('file_actions')
+                ->where([['File_Action_file_id', '=', $id],])
+                  ->join('doc_files', 'doc_files.Doc_File_QR_id', '=', 'file_actions.File_Action_file_id')
+                  ->join('office_entities', 'office_entities.Office_Entity_id', '=', 'file_actions.File_Action_emp_id')
+                  ->join('office_desks', 'office_desks.Office_Desk_id', '=', 'file_actions.File_Action_desk_id')
+                  ->get()->toArray();
+
+            $Initiator_id=$varFile_Action[0]->Doc_File_initiator_id;
+            $Task_id=$varFile_Action[0]->Doc_File_task_id;
+
+            $varInitiator = Initiator::find($Initiator_id);
+            $varTask= Task::find($Task_id);
+
+            $varOfficeDepartment = OfficeDepartment::find($Temp_Current_department_id);
+            $varOfiice= Office::find($Temp_Current_office_id);
+
+            return view('QR',compact('id','varFile_Action','varInitiator','varTask','varOfficeDepartment','varOfiice'));
       }
-      $id = session("fid");
-      return view('QR',compact('id'));
-        //return QrCode::size(300)->generate("$id");
-    }
+
+
+
+      return view('welcome');
+      }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -67,7 +100,33 @@ class QrcodeController extends Controller
         return view('welcome');
       }
 
-      return view('QR',compact('id'));
+
+
+      $Temp_Current_User_id=session('Current_User_id');
+      $Temp_Current_office_id=session('Current_office_id');
+      $Temp_Current_department_id=session('Current_department_id');
+
+
+
+      $varFile_Action = DB::table('file_actions')
+          ->where([['File_Action_file_id', '=', $id],])
+            ->join('doc_files', 'doc_files.Doc_File_QR_id', '=', 'file_actions.File_Action_file_id')
+            ->join('office_entities', 'office_entities.Office_Entity_id', '=', 'file_actions.File_Action_emp_id')
+            ->join('office_desks', 'office_desks.Office_Desk_id', '=', 'file_actions.File_Action_desk_id')
+            ->get()->toArray();
+
+      $Initiator_id=$varFile_Action[0]->Doc_File_initiator_id;
+      $Task_id=$varFile_Action[0]->Doc_File_task_id;
+
+      $varInitiator = Initiator::find($Initiator_id);
+      $varTask= Task::find($Task_id);
+
+      $varOfficeDepartment = OfficeDepartment::find($Temp_Current_department_id);
+      $varOfiice= Office::find($Temp_Current_office_id);
+
+
+
+      return view('QR',compact('id','varFile_Action','varInitiator','varTask','varOfficeDepartment','varOfiice'));
     }
 
 

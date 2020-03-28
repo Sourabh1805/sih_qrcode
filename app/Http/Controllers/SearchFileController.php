@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\DocFile;
 use App\FileAction;
+use App\OfficeDesk;
 use Illuminate\Support\Facades\DB;
 
 
@@ -42,50 +43,46 @@ class SearchFileController extends Controller
       if(session('Current_User_type') == 'valueEmployee')
       {
 
-        $Temp_Current_User_id=session('Current_User_id');
-        $Temp_Current_office_id=session('Current_office_id');
-        $Temp_Current_department_id=session('Current_department_id');
+                $Temp_Current_User_id=session('Current_User_id');
+                $Temp_Current_office_id=session('Current_office_id');
+                $Temp_Current_department_id=session('Current_department_id');
 
-      $varFile_Action = DB::table('file_actions')
-      ->where([         ['File_Action_file_id', '=', $request->get('File_Action_file_id'),],
-                        ['File_Action_emp_id', '=', $Temp_Current_User_id]
-            ])->get()->toArray();
-
-
-
-            if(sizeof($varFile_Action)==0)
-            {
-              echo "<script>alert('File Does not belong to you')</script>";
-
-            }
-            else {
-            //  print_r ($varFile_Action);
-            //  exit();
-              $File_Action_id=$varFile_Action[0]->File_Action_id;
-
-                //echo $id;
-                //exit();
-                    //return view('Employee_Search_File',compact);
-                    $varFile_Action2=FileAction::find($File_Action_id);
-                    //echo $varFile_Action2;
-                    //exit();
-                    $varFile_Action_Table = DB::table('file_actions')
-                    ->where([['File_Action_file_id', '=',$varFile_Action[0]->File_Action_file_id]  ])
-                    ->join('doc_files', 'doc_files.Doc_File_QR_id', '=', 'file_actions.File_Action_file_id')
-                    ->join('office_entities', 'office_entities.Office_Entity_id', '=', 'file_actions.File_Action_emp_id')
-                    ->join('office_desks', 'office_desks.Office_Desk_id', '=', 'file_actions.File_Action_desk_id')
-                    ->get()->toArray();
-
-                    //print_r ($varFile_Action_Table);
-                    //exit();
+              $varFile_Action = DB::table('file_actions')
+              ->where([         ['File_Action_file_id', '=', $request->get('File_Action_file_id'),],
+                                ['File_Action_emp_id', '=', $Temp_Current_User_id]
+                    ])->get()->toArray();
 
 
 
-                    return view('Employee_Update_File_Status',compact('varFile_Action_Table','varFile_Action','File_Action_id','varFile_Action2'));
-            }
+              if(sizeof($varFile_Action)==0)
+              {
+                echo "<script>alert('File Does not belong to you or enter valid file id')</script>";
+                return view('Employee_Search_File');
+              }
+              else {
+
+                $File_Action_id=$varFile_Action[0]->File_Action_id;
+
+
+                      $varFile_Action2=FileAction::find($File_Action_id);
+
+                      $varFile_Action_Table = DB::table('file_actions')
+                      ->where([['File_Action_file_id', '=',$varFile_Action[0]->File_Action_file_id]  ])
+                      ->join('doc_files', 'doc_files.Doc_File_QR_id', '=', 'file_actions.File_Action_file_id')
+                      ->join('office_entities', 'office_entities.Office_Entity_id', '=', 'file_actions.File_Action_emp_id')
+                      ->join('office_desks', 'office_desks.Office_Desk_id', '=', 'file_actions.File_Action_desk_id')
+                      ->get()->toArray();
+
+                      return view('Employee_Update_File_Status',compact('varFile_Action_Table','varFile_Action','File_Action_id','varFile_Action2'));
+          }
+
+
+
+
 
         }
 
+        return view('welcome');
 
     }
 
@@ -120,25 +117,25 @@ class SearchFileController extends Controller
      */
     public function update(Request $request, $File_Action_id)
     {
-      //echo $request;
-      //exit();
-            if(!session('Current_User_type') == 'Employee')
+
+        // search file
+
+            if(session('Current_User_type') == 'valueEmployee')
             {
-              return view('welcome');
-            }
+
 
             date_default_timezone_set('Asia/Kolkata');
             $d=strtotime("now");
-            $TempCurrentDate= date("Y-m-d h:i:sa",$d);
+            $TempCurrentDate= date("Y-m-d",$d);
             $d=strtotime("+1 day",$d);
-            $TempNextDate= date("Y-m-d h:i:sa", $d);
-
+            $TempNextDate= date("Y-m-d", $d);
 
             $varFile_Action=  FileAction::find($File_Action_id);
             $varFile_Action->File_Action_status=$request->get('File_Action_status');
             $varFile_Action->File_Action_remark=$request->get('File_Action_remark');
 
-            if($request->get('File_Action_status')=="Completed")
+
+            if($request->get('File_Action_status')=="COMPLETED")
             {
               $File_Action_next_desk_id=$request->get('File_Action_next_desk_id');
 
@@ -146,20 +143,70 @@ class SearchFileController extends Controller
               {
                   $varFile_Action->File_Action_end_date=$TempCurrentDate;
 
-                  $varNext_File_Action = DB::table('file_actions')
-                                      ->where([['File_Action_file_id', '=', $request->get('File_Action_file_id'),],
-                                        ['File_Action_emp_id', '=', $File_Action_next_desk_id]
-                                        ])->get()->toArray();
-                    //$varNext_File_Action[0]->File_Action_end_date=$TempNextDate;
-                  //  $varNext_File_Action[0]->File_Action_status="On going";
-                }
 
+
+                  //update next desk action
+
+                  $NextDeskId=$varFile_Action['File_Action_next_desk_id'];
+
+
+                  $varNext_File_Action =DB::table('file_actions')
+                                        ->where([['file_actions.File_Action_file_id','=',$request->get('File_Action_file_id')],
+                                              ['file_actions.File_Action_desk_id','=',$NextDeskId]
+                                            ])
+                                          ->get()->toArray();
+
+                  $varNext_File_Action=FileAction::find($varNext_File_Action[0]->File_Action_id);
+
+                  $varNextDeskId= OfficeDesk::find($NextDeskId);
+
+
+
+                  $now=strtotime("now");
+                  $TempCurrentDate= date("Y-m-d", $now);
+                  $d=strtotime("+1 day",$now);
+                  $TempNextDate= date("Y-m-d",$d);
+
+                  $File_Action_end_date="+".$varNextDeskId['Office_Desk_time_requried']."day";
+                  $File_Action_end_date=strtotime($File_Action_end_date,$now);
+                  $File_Action_end_date= date("Y-m-d",$File_Action_end_date);
+
+
+                //  print_r($varNext_File_Action[0]->File_Action_file_id);
+                //  exit();
+                  $varNext_File_Action->File_Action_status="ON GOING";
+                  $varNext_File_Action->File_Action_end_date=$File_Action_end_date;
+                  $varNext_File_Action->File_Action_Start_date=$TempCurrentDate;
+
+
+                  $varNext_File_Action->save();
+
+
+
+              }
+              else
+              {
+                  $varDocfileid=DB::table('doc_files')
+                              ->where([['doc_files.Doc_File_QR_id','=',$varFile_Action->File_Action_file_id]])
+                              ->get()->toArray();
+
+                  $varDoc_File=DocFile::find($varDocfileid[0]->Doc_File_id);
+
+                  $varDoc_File->Doc_File_status="COMPLETED";
+                  $varDoc_File->Doc_File_end_date=$TempCurrentDate;
+
+                  $varDoc_File->save();
+              }
 
             }
 
             $varFile_Action->save();
-            //$varNext_File_Action[0]->save();
-            return redirect ('/searchfile');
+
+
+            return redirect ('searchfile');
+          }
+      return view('welcome');
+
     }
 
     /**

@@ -7,7 +7,7 @@
     <div id='page-inner'>
       <div class='row'>
         <div class='col-md-12'>
-          <h1 class='page-head-line'>Insert DefMessage details</h1>
+          <h1 class='page-head-line'>Insert department details</h1>
         </div>
       </div>
 
@@ -28,12 +28,12 @@
           </div>
 
           <div class="form-group">
-                <label>Enter Office description:</label>
+                <label>Enter Office department description:</label>
                 <input class="form-control" type="text" name='Office_Department_description' required>
           </div>
 
           <div class="form-group">
-                <label>Enter Office initial:</label>
+                <label>Enter Office department initial:</label>
                 <input class="form-control" type="text" name='Office_Department_initial' required>
           </div>
 

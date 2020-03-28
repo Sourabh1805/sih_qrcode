@@ -13,9 +13,9 @@ $sql_FileAction = "select * from file_actions where File_Action_file_id='$fid' a
 
 date_default_timezone_set('Asia/Kolkata');
 $d=strtotime("now");
-$TempCurrentDate= date("Y-m-d h:i:sa",$d);
+$TempCurrentDate= date("Y-m-d",$d);
 $d=strtotime("+1 day",$d);
-$TempNextDate= date("Y-m-d h:i:sa", $d);
+$TempNextDate= date("Y-m-d", $d);
 
 if(mysqli_query($con,$sql_FileAction))
 {
